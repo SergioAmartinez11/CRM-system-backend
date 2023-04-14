@@ -1,7 +1,21 @@
 const express = require('express');
 const cors = require('cors');
-
 const jwt = require('jsonwebtoken');
+const { Client } = require('pg');
+
+const app = express();
+const port = 3003;
+let arrayUser = [];
+
+const client = new Client({
+  user: 'sergio-martinez',
+  host: 'localhost',
+  database: 'crm',
+  password: '',
+  port: 5432,
+});
+
+client.connect();
 
 const generateToken = (payload, secret) => {
   const options = {
@@ -11,13 +25,6 @@ const generateToken = (payload, secret) => {
   const token = jwt.sign(payload, secret, options);
   return token;
 };
-
-const app = express();
-const port = 3001;
-
-let arrayUser = [
-  { username: 'alonso.martinez64@uabc.edu.mx', password: 'Moldearte123' },
-];
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ type: '*/*' }));
@@ -29,14 +36,27 @@ app.get('/userauth', (req, res) => {
 });
 
 app.post('/userauth', (req, res) => {
-  let transaction = req.body;
-  const token = generateToken(transaction, 'My_key_134');
-  let credentials = {
-    user: 'alonso.martinez64@uabc.edu.mx',
-    password: 'mycrm1234',
-    token: token,
-  };
-  res.send(JSON.stringify(credentials));
+  let payload = req.body;
+  const token = generateToken(payload, payload.key);
+  console.log(payload);
+  client.query(
+    'INSERT INTO public.user (key, username, password, name, lastname) VALUES ($1, $2, $3, $4, $5)',
+    [
+      payload.key,
+      payload.username,
+      payload.password,
+      payload.name,
+      payload.lastname,
+    ],
+    (err, res) => {
+      if (err) throw err;
+
+
+      client.end();
+    },
+  );
+  res.send(JSON.stringify('TOKEN => ' + token));
+ // res.send(JSON.stringify(token));
 });
 
 app.listen(port, () => {
