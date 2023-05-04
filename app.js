@@ -8,6 +8,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var employeesRouter = require('./routes/employees');
 var productRouter = require('./routes/products');
+var authRouter = require('./routes/auth');
 
 var app = express();
 
@@ -27,6 +28,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/employee', employeesRouter)
 app.use('/product', productRouter)
+app.use('/auth', authRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -44,4 +46,5 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+app.listen(3003, ()=>{console.log('listen to 3003')})
 module.exports = app;
