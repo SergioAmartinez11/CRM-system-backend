@@ -36,8 +36,12 @@ router.get('/', function (req, res, next) {
 
 router.post('/new', function (req, res, next) {
   //get all inventorys from DB
-  const { name, description, price, category, provider, address, email, phone } = req.body;
+  const { id, item_name, description, quantity, price, created_by } = req.body;
   let response;
+  const timeStamp = new Date();
+  const created_at = timeStamp.toISOString();
+  const updated_at = null;
+
   const pool = new Pool({
     user: 'sergio-martinez',
     host: 'localhost',
@@ -47,8 +51,17 @@ router.post('/new', function (req, res, next) {
   });
 
   pool.query(
-    'INSERT INTO inventory(name, description, price, category, provider, address, email, phone) VALUES ($1, $2, $3,$4,$5,$6, $7, $8)',
-    [name, description, price, category, provider, address, email, phone],
+    'INSERT INTO inventory(id,item_name,description,quantity,price,created_by,created_at,updated_at,) VALUES ($1, $2, $3,$4,$5,$6, $7, $8)',
+    [
+      id,
+      item_name,
+      description,
+      quantity,
+      price,
+      created_by,
+      created_at,
+      updated_at,
+    ],
     (error, results) => {
       if (error) {
         console.error(error);
@@ -76,7 +89,7 @@ router.delete('/:id', function (req, res, next) {
     password: '',
     port: 5432, // puerto predeterminado de PostgreSQL
   });
-  
+
   pool.query('DELETE FROM inventory WHERE name = $1', [id], (err, res) => {
     if (err) {
       console.error('Error al eliminar usuario:', err.stack);
