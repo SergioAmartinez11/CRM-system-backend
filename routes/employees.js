@@ -1,3 +1,4 @@
+const { log } = require('debug/src/browser');
 var express = require('express');
 var router = express.Router();
 const { Pool } = require('pg');
@@ -15,10 +16,10 @@ router.get('/', function (req, res, next) {
   });
 
   // Define la consulta SQL para obtener todos los datos de una tabla
-  const query = 'SELECT * FROM employee';
+  const query = 'SELECT * FROM employees';
   let data;
   // Ejecuta la consulta dentro del pool de conexión
-  pool.query('SELECT * FROM employee', (error, results) => {
+  pool.query('SELECT * FROM employees', (error, results) => {
     if (error) {
       console.error(error);
       return;
@@ -36,8 +37,26 @@ router.get('/', function (req, res, next) {
 
 router.post('/sign-up', function (req, res, next) {
   //get all employees from DB
-  const { name, lastname, phone, email, position } = req.body;
+  const {
+    id,
+    first_name,
+    last_name,
+    email,
+    phone_number,
+    address,
+    city,
+    state,
+    postal_code,
+    country,
+    role,
+    birthday,
+  } = req.body;
   let response;
+  const timeStamp = new Date();
+  const created_at = timeStamp.toISOString();
+  const updated_at = null;
+  log(req.body);
+
   const pool = new Pool({
     user: 'sergio-martinez',
     host: 'localhost',
@@ -47,8 +66,23 @@ router.post('/sign-up', function (req, res, next) {
   });
 
   pool.query(
-    'INSERT INTO employee(name, lastname, phone, email, position, kardex) VALUES ($1, $2, $3,$4,$5,$6)',
-    [name, lastname, phone, email, position, 'sd8f18248'],
+    'INSERT INTO employees(id,first_name, last_name, email, phone_number, address, city, state, postal_code, country, role, created_at, updated_at, birthday) VALUES ($1, $2, $3,$4,$5,$6, $7,$8,$9,$10, $11, $12, $13, $14)',
+    [
+      id,
+      first_name,
+      last_name,
+      email,
+      phone_number,
+      address,
+      city,
+      state,
+      postal_code,
+      country,
+      role,
+      created_at,
+      updated_at,
+      birthday,
+    ],
     (error, results) => {
       if (error) {
         console.error(error);
@@ -76,12 +110,12 @@ router.delete('/:id', function (req, res, next) {
     password: '',
     port: 5432, // puerto predeterminado de PostgreSQL
   });
-  
-  pool.query('DELETE FROM employee WHERE name = $1', [id], (err, res) => {
+
+  pool.query('DELETE FROM employees WHERE id = $1', [id], (err, res) => {
     if (err) {
       console.error('Error al eliminar usuario:', err.stack);
     } else {
-      console.log(`Usuario con NAME ${id} eliminado con éxito`);
+      console.log(`Usuario ${id} eliminado con éxito`);
     }
     pool.end();
   });
