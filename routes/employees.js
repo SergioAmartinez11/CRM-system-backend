@@ -25,13 +25,55 @@ router.get('/', function (req, res, next) {
       return;
     } else {
       console.log(`Se obtuvieron ${results.rowCount} filas de la tabla`);
-      console.log(results.rows);
+      //console.log(results.rows);
     }
 
     data = JSON.stringify(results.rows);
     res.send(data);
   });
   // Cierra la conexión al pool después de realizar la consulta
+  pool.end();
+});
+
+router.put('/update/:id', function (req, res, next) {
+  const pool = new Pool({
+    user: 'sergio-martinez',
+    host: 'localhost',
+    database: 'crm',
+    password: '',
+    port: 5432, // puerto predeterminado de PostgreSQL
+  });
+  const timeStamp = new Date();
+  const updatedData = req.body;
+
+  const updated_at = timeStamp.toISOString();
+  const {id} = req.params 
+  console.log(updatedData);
+  pool.query(
+    'UPDATE employees SET first_name = $1, last_name = $2, email = $3, phone_number = $4, address = $5, city = $6, state = $7, postal_code = $8, country = $9, role = $10, updated_at = $11, birthday = $12 WHERE id = $13',
+    [
+      updatedData.first_name,
+      updatedData.last_name,
+      updatedData.email,
+      updatedData.phone_number,
+      updatedData.address,
+      updatedData.city,
+      updatedData.state,
+      updatedData.postal_code,
+      updatedData.country,
+      updatedData.role,
+      updated_at,
+      updatedData.birthday,
+      id
+    ],
+    (error, results) => {
+      if (error) {
+        console.error(error);
+        return;
+      }
+      console.log(`Se actualizó el registro con ID ${id}`);
+    },
+  );
   pool.end();
 });
 
@@ -102,7 +144,7 @@ router.post('/sign-up', function (req, res, next) {
   pool.end();
 });
 
-router.delete('/:id', function (req, res, next) {
+router.delete('/delete/:id', function (req, res, next) {
   const pool = new Pool({
     user: 'sergio-martinez',
     host: 'localhost',
@@ -111,11 +153,13 @@ router.delete('/:id', function (req, res, next) {
     port: 5432, // puerto predeterminado de PostgreSQL
   });
 
+  const { id } = req.params;
+
   pool.query('DELETE FROM employees WHERE id = $1', [id], (err, res) => {
     if (err) {
-      console.error('Error al eliminar usuario:', err.stack);
+      console.error('Error al eliminar empleado:', err.stack);
     } else {
-      console.log(`Usuario ${id} eliminado con éxito`);
+      console.log(`Empleado ${id} eliminado con éxito`);
     }
     pool.end();
   });
